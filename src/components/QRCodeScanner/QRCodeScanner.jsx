@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import QrScanner from 'react-qr-scanner';
 import { useNavigate } from 'react-router-dom';
 
-const QRCodeScanner = ({ classInfo }) => {
+const QRCodeScanner = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
@@ -10,11 +10,12 @@ const QRCodeScanner = ({ classInfo }) => {
     if (data) {
       try {
         const scannedData = JSON.parse(data);
-        if (scannedData.classId === classInfo.id) {
-          navigate(`/timer/${classInfo.id}`);
-        } else {
-          setError("Invalid QR code for this class.");
-        }
+        navigate(`/timer/${scannedData.classId}`, { 
+          state: { 
+            startTime: scannedData.startTime,
+            duration: scannedData.duration 
+          } 
+        });
       } catch (error) {
         setError("Invalid QR Code data. Please try again.");
       }
@@ -23,13 +24,7 @@ const QRCodeScanner = ({ classInfo }) => {
 
   const handleError = (err) => {
     console.error(err);
-    if (err.name === 'NotAllowedError') {
-      setError("Camera access denied. Please allow camera access and refresh the page.");
-    } else if (err.name === 'NotFoundError') {
-      setError("No camera found on this device.");
-    } else {
-      setError("Error accessing the camera. Please try again.");
-    }
+    setError("Error scanning QR code. Please try again.");
   };
 
   return (

@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const Timer = () => {
-  const { classId } = useParams();
-  const classDuration = 90 * 60; // 1 hour and 30 minutes in seconds
+  const location = useLocation();
+  const { startTime, duration } = location.state || {};
+  
+  const [timeLeft, setTimeLeft] = useState(calculateInitialTimeLeft());
 
-  const [timeLeft, setTimeLeft] = useState(classDuration);
+  function calculateInitialTimeLeft() {
+    if (!startTime || !duration) return 0;
+    
+    const start = new Date(startTime);
+    const now = new Date();
+    const elapsedSeconds = Math.floor((now - start) / 1000);
+    const totalSeconds = duration * 60; // duration is in minutes
+    
+    return Math.max(totalSeconds - elapsedSeconds, 0);
+  }
 
   useEffect(() => {
+    if (!startTime || !duration) return;
+
     const interval = setInterval(() => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 0) {
@@ -19,7 +32,7 @@ const Timer = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [startTime, duration]);
 
   const formatTime = (time) => {
     const hours = Math.floor(time / 3600);
@@ -32,9 +45,13 @@ const Timer = () => {
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Class Timer</h2>
-      <div className="text-4xl font-bold text-red-500">
-        {timeLeft > 0 ? formatTime(timeLeft) : "Class Ended"}
-      </div>
+      {startTime && duration ? (
+        <div className="text-4xl font-bold text-red-500">
+          {timeLeft > 0 ? formatTime(timeLeft) : "Class Ended"}
+        </div>
+      ) : (
+        <div className="text-red-500">Error: Class information not provided</div>
+      )}
     </div>
   );
 };

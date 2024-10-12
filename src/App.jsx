@@ -9,14 +9,14 @@ const App = () => {
   const classInfo = {
     id: uuidv4(), // Generates a unique UUID
     name: 'Coding Class',
-    duration: '1:30:00', // 1 hour and 30 minutes
+    duration: 90, // 1 hour and 30 minutes in minutes
   };
 
   return (
     <Router>
       <Routes>
         <Route path="/" element={<QRCodeGenerator classInfo={classInfo} />} />
-        <Route path="/scan" element={<QRCodeScanner classInfo={classInfo} />} />
+        <Route path="/scan" element={<QRCodeScanner />} />
         <Route path="/timer/:classId" element={<Timer />} />
       </Routes>
     </Router>

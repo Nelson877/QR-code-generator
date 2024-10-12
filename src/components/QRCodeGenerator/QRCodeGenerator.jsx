@@ -2,10 +2,12 @@ import React from 'react';
 import { QRCode } from 'react-qrcode-logo';
 
 const QRCodeGenerator = ({ classInfo }) => {
+  const startTime = new Date().toISOString(); // Current time as start time
   const qrValue = JSON.stringify({
     classId: classInfo.id,
     className: classInfo.name,
-    classTime: classInfo.endTime, // Make sure to provide the end time in ISO format
+    startTime: startTime,
+    duration: classInfo.duration, // in minutes
   });
 
   return (
@@ -14,6 +16,7 @@ const QRCodeGenerator = ({ classInfo }) => {
       <div className="p-4 bg-white border rounded-lg shadow-md">
         <QRCode value={qrValue} size={256} />
       </div>
+      <p className="mt-4 text-sm text-gray-600">Class starts at: {new Date(startTime).toLocaleTimeString()}</p>
     </div>
   );
 };

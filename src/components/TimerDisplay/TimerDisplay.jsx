@@ -1,58 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
-const TimerDisplay = ({ classInfo }) => {
-  const { classId } = useParams(); // Retrieve the classId from the URL
-  const classEndTime = classInfo.time; // Get the class end time
-
-  const calculateTimeLeft = () => {
-    const difference = +new Date(classEndTime) - +new Date();
-    let timeLeft = {};
-
-    if (difference > 0) {
-      timeLeft = {
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-    return timeLeft;
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+const TimerDisplay = () => {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [className, setClassName] = useState('');
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+    const params = new URLSearchParams(window.location.search);
+    const endTime = new Date(params.get('endTime'));
+    setClassName(params.get('className') || 'Class');
 
-    return () => clearTimeout(timer);
-  }, [timeLeft]);
+    const updateTimer = () => {
+      const now = new Date();
+      const difference = endTime - now;
 
-  const timerComponents = [];
+      if (difference > 0) {
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        setTimeLeft(`${hours}h ${minutes}m`);
+      } else {
+        setTimeLeft('Time to pick up!');
+      }
+    };
 
-  Object.keys(timeLeft).forEach((interval) => {
-    if (!timeLeft[interval]) {
-      return;
-    }
+    updateTimer();
+    const timerId = setInterval(updateTimer, 60000);
 
-    timerComponents.push(
-      <span key={interval}>
-        {timeLeft[interval]} {interval}{" "}
-      </span>
-    );
-  });
+    return () => clearInterval(timerId);
+  }, []);
 
   return (
-    <div className="text-center p-4 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Time Left Until Class Ends</h2>
-      {timerComponents.length ? (
-        <div className="text-lg text-gray-700">
-          {timerComponents}
-        </div>
-      ) : (
-        <span className="text-red-500 text-lg">Class is over!</span>
-      )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="p-8 bg-white rounded-lg shadow-xl">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">Pick-up Timer</h1>
+        <p className="text-xl text-gray-600 mb-2">{className}</p>
+        <p className="text-xl text-gray-600 mb-2">Time remaining:</p>
+        <div className="text-4xl font-bold text-blue-600">{timeLeft}</div>
+      </div>
     </div>
   );
 };

@@ -3,12 +3,10 @@ import { QRCode } from 'react-qrcode-logo';
 
 const QRCodeGenerator = ({ classInfo }) => {
   const startTime = new Date().toISOString(); // Current time as start time
-  const qrValue = JSON.stringify({
-    classId: classInfo.id,
-    className: classInfo.name,
-    startTime: startTime,
-    duration: classInfo.duration, // in minutes
-  });
+  const endTime = new Date(new Date().getTime() + 90 * 60000).toISOString(); // 1 hour 30 minutes from now
+
+  // Use a relative URL that points to a route within your application
+  const qrValue = `/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}&startTime=${startTime}&endTime=${endTime}`;
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-lg">
@@ -16,7 +14,6 @@ const QRCodeGenerator = ({ classInfo }) => {
       <div className="p-4 bg-white border rounded-lg shadow-md">
         <QRCode value={qrValue} size={256} />
       </div>
-      <p className="mt-4 text-sm text-gray-600">Class starts at: {new Date(startTime).toLocaleTimeString()}</p>
     </div>
   );
 };

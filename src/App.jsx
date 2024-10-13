@@ -1,9 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import QRCodeScanner from './components/QRCodeScanner/QRCodeScanner';
-import Timer from './components/Timer/Timer';
-import QRCodeGenerator from './components/QRCodeGenerator/QRCodeGenerator';
 import { v4 as uuidv4 } from 'uuid';
+import QRCodeGenerator from './components/QRCodeGenerator/QRCodeGenerator';
+import TimerDisplay from './components/TimerDisplay/TimerDisplay';
 
 const App = () => {
   const classInfo = {
@@ -16,8 +15,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<QRCodeGenerator classInfo={classInfo} />} />
-        <Route path="/scan" element={<QRCodeScanner />} />
-        <Route path="/timer/:classId" element={<Timer />} />
+        <Route path="/timer" element={<TimerDisplay />} />
       </Routes>
     </Router>
   );

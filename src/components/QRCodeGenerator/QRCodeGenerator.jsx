@@ -2,11 +2,12 @@ import React from 'react';
 import { QRCode } from 'react-qrcode-logo';
 
 const QRCodeGenerator = ({ classInfo }) => {
-  const startTime = new Date().toISOString(); // Current time as start time
-  const endTime = new Date(new Date().getTime() + 90 * 60000).toISOString(); // 1 hour 30 minutes from now
+  const startTime = new Date().toISOString();
+  const endTime = new Date(new Date().getTime() + 90 * 60000).toISOString();
 
-  // Use a relative URL that points to a route within your application
-  const qrValue = `/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}&startTime=${startTime}&endTime=${endTime}`;
+  // Use the full URL of your deployed application
+  const baseUrl = 'https://qr-code-generator-vert-nine.vercel.app/'; // Replace with your actual domain
+  const qrValue = `${baseUrl}/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}&startTime=${startTime}&endTime=${endTime}`;
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-lg">

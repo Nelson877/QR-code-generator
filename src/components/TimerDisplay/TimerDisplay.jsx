@@ -7,7 +7,7 @@ const TimerDisplay = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const endTime = new Date(params.get('endTime'));
-    setClassName(params.get('className') || 'Class');
+    setClassName(decodeURIComponent(params.get('className') || 'Class'));
 
     const updateTimer = () => {
       const now = new Date();
@@ -16,14 +16,15 @@ const TimerDisplay = () => {
       if (difference > 0) {
         const hours = Math.floor(difference / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        setTimeLeft(`${hours}h ${minutes}m`);
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
       } else {
         setTimeLeft('Time to pick up!');
       }
     };
 
     updateTimer();
-    const timerId = setInterval(updateTimer, 60000);
+    const timerId = setInterval(updateTimer, 1000); // Update every second for smoother countdown
 
     return () => clearInterval(timerId);
   }, []);

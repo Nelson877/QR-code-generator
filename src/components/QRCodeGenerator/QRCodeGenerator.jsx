@@ -10,10 +10,12 @@ const QRCodeGenerator = ({ classInfo }) => {
   const qrValue = `${baseUrl}/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}&startTime=${startTime}&endTime=${endTime}`;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Scan this QR Code</h2>
-      <div className="p-4 bg-white border rounded-lg shadow-md">
-        <QRCode value={qrValue} size={256} />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-xl">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Scan this QR Code</h2>
+        <div className="p-4 bg-white border rounded-lg shadow-md">
+          <QRCode value={qrValue} size={256} />
+        </div>
       </div>
     </div>
   );

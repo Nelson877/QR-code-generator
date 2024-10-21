@@ -1,8 +1,10 @@
 const twilio = require('twilio');
 
 // Your Twilio credentials
-const accountSid = 'ACced37cbe7d49c7f06da9d00727a54376';
-const authToken = 'f80562bf40a7abe31eaab2b945c839ca';
+
+process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+
 const client = twilio(accountSid, authToken);
 
 const sendSMS = async (to, message) => {

@@ -9,7 +9,7 @@ const QRCodeGenerator = ({ classInfo: propsClassInfo }) => {
   const parentName = location.state?.parentName;
 
   // Base URL for the application
-  // const baseUrl = 'https://qr-code-generator-vert-nine.vercel.app';
+  const baseUrl = 'https://qr-code-generator-vert-nine.vercel.app';
   
   // Generate URL for the login page with class information as query parameters
   const qrValue = `${baseUrl}/login?${new URLSearchParams({

@@ -20,6 +20,7 @@
     "react-qr-scanner": "^1.0.0-alpha.11",
     "react-qrcode-logo": "^3.0.0",
     "react-router-dom": "^6.27.0",
+    "react-spinners": "^0.14.1",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

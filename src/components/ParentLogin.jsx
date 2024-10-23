@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+// For Vercel deployment
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://qr-code-generator-navy-beta.vercel.app/' 
+  : 'http://localhost:5174/';
+
 const ParentLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,24 +38,37 @@ const ParentLogin = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const response = await fetch('http://localhost:3000/api/parent/login', {
+      // Use relative URL for API calls in production
+      const apiUrl = process.env.NODE_ENV === 'production'
+        ? '/api/parent/login'  // In production, use relative path
+        : `${API_BASE_URL}/api/parent/login`; // In development, use full URL
+
+      console.log('Making login request to:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: name.trim(),
-          phoneNumber: phoneNumber.replace(/[-\s]/g, ''), // Remove spaces and dashes
+          phoneNumber: phoneNumber.replace(/[-\s]/g, ''),
         }),
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed. Please try again.');
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Login failed (Status: ${response.status}). Please try again.`);
       }
 
-      const data = await response.json();
+      const data = await response.json().catch(() => {
+        throw new Error('Invalid response from server');
+      });
+
+      if (!data || !data.parent) {
+        throw new Error('Invalid response data from server');
+      }
 
       // Store parent data in localStorage
       localStorage.setItem('parentData', JSON.stringify(data.parent));
@@ -80,8 +98,8 @@ const ParentLogin = () => {
         navigate('/timer', { state: navigationState });
       }
     } catch (error) {
-      setError(error.message);
       console.error('Login error:', error);
+      setError(error.message || 'Failed to connect to the server. Please check your internet connection.');
     } finally {
       setIsLoading(false);
     }
@@ -103,14 +121,12 @@ const ParentLogin = () => {
           <div className="rounded-md bg-red-50 p-4 text-sm text-red-600 border border-red-200">
             <div className="flex">
               <div className="flex-shrink-0">
-                {/* Error icon */}
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">{error}</div>
+                <div className="text-sm text-red-700">{error}</div>
               </div>
             </div>
           </div>

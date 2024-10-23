@@ -2,11 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
-// For Vercel deployment
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://qr-code-generator-navy-beta.vercel.app/' 
-  : 'http://localhost:3000/';
-
 const ParentLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,10 +33,7 @@ const ParentLogin = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      // Use relative URL for API calls in production
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? '/api/parent/login'  // In production, use relative path
-        : `${API_BASE_URL}/api/parent/login`; // In development, use full URL
+      const apiUrl = '/api/parent/login';  // Simplified to use relative URL
 
       console.log('Making login request to:', apiUrl);
 

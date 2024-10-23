@@ -30,23 +30,36 @@ const ParentRegister = () => {
 
       const apiUrl = '/api/parent/register';
 
-      console.log('Making registration request to:', apiUrl);
+      // First, make a preflight OPTIONS request
+      const preflightResponse = await fetch(apiUrl, {
+        method: 'OPTIONS',
+        headers: {
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'Content-Type',
+          'Origin': window.location.origin
+        }
+      });
 
+      // Then make the actual POST request
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Accept': 'application/json',
+          'Origin': window.location.origin
         },
+        credentials: 'include',
         body: JSON.stringify({
           name: formData.name.trim(),
           phoneNumber: formData.phoneNumber.replace(/[-\s]/g, ''),
         }),
-        credentials: 'include',
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Registration failed (Status: ${response.status}). Please try again.`);
+        const errorData = await response.json().catch(() => ({
+          error: `Registration failed (Status: ${response.status}). Please try again.`
+        }));
+        throw new Error(errorData.error || `Registration failed (Status: ${response.status}). Please try again.`);
       }
 
       const data = await response.json().catch(() => {

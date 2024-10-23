@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 // For Vercel deployment
 const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://qr-code-generator-navy-beta.vercel.app/' 
-  : 'http://localhost:5174/';
+  : 'http://localhost:3000/';
 
 const ParentLogin = () => {
   const navigate = useNavigate();

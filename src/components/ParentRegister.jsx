@@ -1,25 +1,25 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 const ParentRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
-    phoneNumber: "",
+    name: '',
+    phoneNumber: '',
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
       // Basic validation
       if (!formData.name.trim() || !formData.phoneNumber.trim()) {
-        throw new Error("Please fill in all fields");
+        throw new Error('Please fill in all fields');
       }
 
       // Phone number validation
@@ -28,59 +28,42 @@ const ParentRegister = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const apiUrl = '/api/parent/register';
+      const apiUrl = process.env.NODE_ENV === 'production'
+        ? `${window.location.origin}/api/parent/register`
+        : '/api/parent/register';
 
-      // First, make a preflight OPTIONS request
-      const preflightResponse = await fetch(apiUrl, {
-        method: 'OPTIONS',
-        headers: {
-          'Access-Control-Request-Method': 'POST',
-          'Access-Control-Request-Headers': 'Content-Type',
-          'Origin': window.location.origin
-        }
-      });
-
-      // Then make the actual POST request
       const response = await fetch(apiUrl, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          'Accept': 'application/json',
-          'Origin': window.location.origin
+          'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({
           name: formData.name.trim(),
           phoneNumber: formData.phoneNumber.replace(/[-\s]/g, ''),
         }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({
-          error: `Registration failed (Status: ${response.status}). Please try again.`
-        }));
-        throw new Error(errorData.error || `Registration failed (Status: ${response.status}). Please try again.`);
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Registration failed (Status: ${response.status}). Please try again.`);
       }
 
-      const data = await response.json().catch(() => {
-        throw new Error('Invalid response from server');
-      });
+      const data = await response.json();
 
       if (!data || !data.parent) {
         throw new Error('Invalid response data from server');
       }
 
       // Store parent data in localStorage
-      localStorage.setItem("parentData", JSON.stringify(data.parent));
+      localStorage.setItem('parentData', JSON.stringify(data.parent));
 
-      // Create class info object
       const classInfo = {
         id: uuidv4(),
-        name: "Coding Class",
+        name: 'Coding Class',
         duration: 90,
       };
 
-      // Navigate to QR code generator with class info and parent name
       navigate('/qr-code-generator', {
         state: {
           classInfo,
@@ -97,7 +80,7 @@ const ParentRegister = () => {
   };
 
   const handleChange = (e) => {
-    setError(""); // Clear error when user starts typing
+    setError('');
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -125,7 +108,6 @@ const ParentRegister = () => {
             </div>
           </div>
         )}
-
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">

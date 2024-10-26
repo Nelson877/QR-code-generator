@@ -33,7 +33,9 @@ const ParentLogin = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const apiUrl = '/api/parent/login';  // Simplified to use relative URL
+      const apiUrl = process.env.NODE_ENV === 'production'
+        ? `${window.location.origin}/api/parent/login`
+        : '/api/parent/login';
 
       console.log('Making login request to:', apiUrl);
 
@@ -54,9 +56,7 @@ const ParentLogin = () => {
         throw new Error(data.error || `Login failed (Status: ${response.status}). Please try again.`);
       }
 
-      const data = await response.json().catch(() => {
-        throw new Error('Invalid response from server');
-      });
+      const data = await response.json();
 
       if (!data || !data.parent) {
         throw new Error('Invalid response data from server');
@@ -74,7 +74,6 @@ const ParentLogin = () => {
       const startTime = new Date().toISOString();
       const endTime = new Date(new Date().getTime() + 90 * 60000).toISOString();
 
-      // Navigate to the appropriate page
       const navigationState = {
         classInfo,
         parentName: name,

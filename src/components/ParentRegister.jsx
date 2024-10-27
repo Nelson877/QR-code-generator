@@ -24,34 +24,42 @@ const ParentRegister = () => {
 
       // Phone number validation
       const phoneRegex = /^\d{10}$/;
-      if (!phoneRegex.test(formData.phoneNumber.replace(/[-\s]/g, ''))) {
+      const cleanPhoneNumber = formData.phoneNumber.replace(/[-\s]/g, '');
+      
+      if (!phoneRegex.test(cleanPhoneNumber)) {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? `${window.location.origin}/api/parent/register`
-        : '/api/parent/register';
+      // Use direct URL instead of environment-based URL
+      const apiUrl = 'http://localhost:3000/api/parent/register';
+
+      console.log('Making registration request to:', apiUrl);
+      console.log('Request payload:', {
+        name: formData.name.trim(),
+        phoneNumber: cleanPhoneNumber,
+      });
 
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        credentials: 'include', // Added this line
         body: JSON.stringify({
           name: formData.name.trim(),
-          phoneNumber: formData.phoneNumber.replace(/[-\s]/g, ''),
+          phoneNumber: cleanPhoneNumber,
         }),
-        credentials: 'include',
       });
 
+      const data = await response.json();
+      console.log('Server response:', data);
+
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
         throw new Error(data.error || `Registration failed (Status: ${response.status}). Please try again.`);
       }
 
-      const data = await response.json();
-
-      if (!data || !data.parent) {
+      if (!data.success || !data.parent) {
         throw new Error('Invalid response data from server');
       }
 
@@ -80,11 +88,12 @@ const ParentRegister = () => {
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setError('');
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   return (
@@ -108,6 +117,7 @@ const ParentRegister = () => {
             </div>
           </div>
         )}
+
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">

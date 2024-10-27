@@ -33,9 +33,8 @@ const ParentLogin = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? `${window.location.origin}/api/parent/login`
-        : '/api/parent/login';
+      // Use direct URL instead of relative path
+      const apiUrl = 'http://localhost:3000/api/parent/login';
 
       console.log('Making login request to:', apiUrl);
 
@@ -43,12 +42,13 @@ const ParentLogin = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json', // Added this line
         },
+        credentials: 'include',
         body: JSON.stringify({
           name: name.trim(),
           phoneNumber: phoneNumber.replace(/[-\s]/g, ''),
         }),
-        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -62,7 +62,7 @@ const ParentLogin = () => {
         throw new Error('Invalid response data from server');
       }
 
-      // Store parent data in localStorage
+      // Rest of your code remains the same
       localStorage.setItem('parentData', JSON.stringify(data.parent));
 
       const classInfo = {

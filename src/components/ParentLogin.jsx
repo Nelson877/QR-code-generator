@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const ParentLogin = () => {
   const navigate = useNavigate();
@@ -22,71 +21,56 @@ const ParentLogin = () => {
 
     try {
       if (!name.trim() || !phoneNumber.trim()) {
-        throw new Error('Please fill in all fields');
+        throw new Error('Please fill in all required fields');
       }
 
+      const cleanPhoneNumber = phoneNumber.replace(/[-\s]/g, '');
       const phoneRegex = /^\d{10}$/;
-      if (!phoneRegex.test(phoneNumber.replace(/[-\s]/g, ''))) {
+      
+      if (!phoneRegex.test(cleanPhoneNumber)) {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const response = await fetch('http://localhost:3000/api/parent/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: name.trim(),
-          phoneNumber: phoneNumber.replace(/[-\s]/g, ''),
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Login failed (Status: ${response.status}). Please try again.`);
-      }
-
-      const data = await response.json();
-
-      if (!data || !data.parent) {
-        throw new Error('Invalid response data from server');
-      }
-
-      localStorage.setItem('parentData', JSON.stringify(data.parent));
-
-      const classInfo = {
-        id: classId || uuidv4(),
-        name: className || "Coding Class",
-        duration: 90,
+      // Mock successful login
+      const mockParentData = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: name.trim(),
+        phoneNumber: cleanPhoneNumber,
       };
 
-      const startTime = new Date();
-      const endTime = new Date(startTime.getTime() + 90 * 60000);
+      // Store mock data in localStorage
+      localStorage.setItem('parentData', JSON.stringify(mockParentData));
 
-      const navigationState = {
-        classInfo,
-        parentData: {
-          ...data.parent,
-          name: name,
-        },
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString()
-      };
-
+      // Handle navigation based on provided parameters
       if (redirectTo) {
-        navigate(decodeURIComponent(redirectTo), { state: navigationState });
+        navigate(redirectTo);
       } else {
-        navigate('/timer', { state: navigationState });
+        const defaultClassInfo = {
+          id: classId || Math.random().toString(36).substr(2, 9),
+          name: className || 'Default Class',
+          duration: 90,
+        };
+
+        const startTime = new Date();
+        const endTime = new Date(startTime.getTime() + defaultClassInfo.duration * 60000);
+
+        navigate('/timer', {
+          state: {
+            classInfo: defaultClassInfo,
+            parentData: mockParentData,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString()
+          }
+        });
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'Failed to connect to the server. Please check your internet connection.');
+      setError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg">

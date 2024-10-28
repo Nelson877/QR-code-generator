@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 
 const ParentRegister = () => {
   const navigate = useNavigate();
@@ -10,6 +9,14 @@ const ParentRegister = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -28,33 +35,19 @@ const ParentRegister = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      const response = await fetch('http://localhost:3000/api/parent/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          phoneNumber: cleanPhoneNumber,
-        }),
-      });
+      // Create mock parent data that would normally come from the server
+      const mockParentData = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: formData.name.trim(),
+        phoneNumber: cleanPhoneNumber,
+      };
 
-      const data = await response.json();
+      // Store parent data in localStorage
+      localStorage.setItem('parentData', JSON.stringify(mockParentData));
 
-      if (!response.ok) {
-        throw new Error(data.error || `Registration failed (Status: ${response.status}). Please try again.`);
-      }
-
-      if (!data.success || !data.parent) {
-        throw new Error('Invalid response data from server');
-      }
-
-      localStorage.setItem('parentData', JSON.stringify(data.parent));
-
+      // Create class info
       const classInfo = {
-        id: uuidv4(),
+        id: Math.random().toString(36).substr(2, 9),
         name: 'Coding Class',
         duration: 90,
       };
@@ -62,20 +55,18 @@ const ParentRegister = () => {
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + 90 * 60000);
 
+      // Navigate to timer page with necessary data
       navigate('/timer', {
         state: {
           classInfo,
-          parentData: {
-            ...data.parent,
-            name: formData.name
-          },
+          parentData: mockParentData,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString()
         }
       });
     } catch (error) {
       console.error('Registration error:', error);
-      setError(error.message || 'Failed to connect to the server. Please check your internet connection.');
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +138,7 @@ const ParentRegister = () => {
 
         <div className="text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <a href="/" className="font-semibold text-black hover:underline">
+          <a href="/login" className="font-semibold text-black hover:underline">
             Login
           </a>
         </div>

@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
 
 const TimerDisplay = ({ initialState = null }) => {
   const [timeLeft, setTimeLeft] = useState('');
   const [className, setClassName] = useState('');
   const [notificationSent, setNotificationSent] = useState(false);
-  const [classId, setClassId] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const location = useLocation();
-
-  // Use either location state or initialState provided through props
-  const timerState = location.state || initialState;
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!timerState) {
+    if (!initialState) {
+      console.error('No timer state found');
       return;
     }
 
-    const { classInfo, parentData } = timerState;
-    const startTime = new Date(timerState.startTime || new Date());
-    const endTime = new Date(timerState.endTime || new Date(startTime.getTime() + (classInfo.duration * 60000)));
+    const { classInfo, parentData } = initialState;
+    const startTime = new Date(initialState.startTime || new Date());
+    const endTime = new Date(initialState.endTime || new Date(startTime.getTime() + (classInfo.duration * 60000)));
 
     setClassName(classInfo.name);
-    setClassId(classInfo.id);
-    setPhoneNumber(parentData.phoneNumber);
-
-    // Create class when component mounts
-    createClass(classInfo.name);
 
     const updateTimer = () => {
       const now = new Date();
@@ -40,8 +30,8 @@ const TimerDisplay = ({ initialState = null }) => {
       } else {
         setTimeLeft('Time to pick up!');
         if (!notificationSent) {
-          sendNotification();
           setNotificationSent(true);
+          // Here you could trigger any callback passed as prop instead of direct API call
         }
       }
     };
@@ -50,25 +40,26 @@ const TimerDisplay = ({ initialState = null }) => {
     const timerId = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timerId);
-  }, [timerState, notificationSent]);
+  }, [initialState, notificationSent]);
 
-  // Your existing createClass, registerAttendance, and sendNotification functions remain the same
-
-  if (!timerState) {
-    return <Navigate to="/login" />;
+  if (!initialState) {
+    return null;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-8 bg-white rounded-lg shadow-xl">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Pick-up Timer</h1>
-        <p className="text-xl text-gray-600 mb-2">{className}</p>
-        <p className="text-xl text-gray-600 mb-2">Time remaining:</p>
-        <div className="text-4xl font-bold text-blue-600">{timeLeft}</div>
-        {notificationSent && (
-          <p className="mt-4 text-green-600">SMS Notification sent to parents!</p>
-        )}
-      </div>
+    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-center mb-4">Pick-up Timer</h2>
+      <h3 className="text-xl text-center mb-4">{className}</h3>
+      <p className="text-gray-600 text-center mb-2">Time remaining:</p>
+      <p className="text-3xl font-bold text-center mb-4">{timeLeft}</p>
+      {error && (
+        <div className="text-red-500 text-center mb-4">{error}</div>
+      )}
+      {notificationSent && (
+        <div className="text-green-500 text-center">
+          SMS Notification sent to parents!
+        </div>
+      )}
     </div>
   );
 };

@@ -10,7 +10,6 @@ const ParentLogin = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Parse query parameters from the URL
   const searchParams = new URLSearchParams(location.search);
   const classId = searchParams.get('classId');
   const className = searchParams.get('className');
@@ -22,27 +21,20 @@ const ParentLogin = () => {
     setError('');
 
     try {
-      // Basic validation
       if (!name.trim() || !phoneNumber.trim()) {
         throw new Error('Please fill in all fields');
       }
 
-      // Phone number validation
       const phoneRegex = /^\d{10}$/;
       if (!phoneRegex.test(phoneNumber.replace(/[-\s]/g, ''))) {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      // Use direct URL instead of relative path
-      const apiUrl = 'http://localhost:3000/api/parent/login';
-
-      console.log('Making login request to:', apiUrl);
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch('http://localhost:3000/api/parent/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json', // Added this line
+          'Accept': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -62,7 +54,6 @@ const ParentLogin = () => {
         throw new Error('Invalid response data from server');
       }
 
-      // Rest of your code remains the same
       localStorage.setItem('parentData', JSON.stringify(data.parent));
 
       const classInfo = {
@@ -71,20 +62,21 @@ const ParentLogin = () => {
         duration: 90,
       };
 
-      const startTime = new Date().toISOString();
-      const endTime = new Date(new Date().getTime() + 90 * 60000).toISOString();
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + 90 * 60000);
 
       const navigationState = {
         classInfo,
-        parentName: name,
-        startTime,
-        endTime,
-        parentData: data.parent
+        parentData: {
+          ...data.parent,
+          name: name,
+        },
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString()
       };
 
       if (redirectTo) {
-        const decodedRedirectUrl = decodeURIComponent(redirectTo);
-        navigate(decodedRedirectUrl, { state: navigationState });
+        navigate(decodeURIComponent(redirectTo), { state: navigationState });
       } else {
         navigate('/timer', { state: navigationState });
       }
@@ -95,7 +87,6 @@ const ParentLogin = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg">

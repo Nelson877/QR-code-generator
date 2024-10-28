@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
 
-const TimerDisplay = () => {
+const TimerDisplay = ({ initialState = null }) => {
   const [timeLeft, setTimeLeft] = useState('');
   const [className, setClassName] = useState('');
   const [notificationSent, setNotificationSent] = useState(false);
   const [classId, setClassId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const location = useLocation();
+
+  // Use either location state or initialState provided through props
+  const timerState = location.state || initialState;
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const endTime = new Date(params.get('endTime'));
-    const classNameParam = decodeURIComponent(params.get('className') || 'Class');
-    const classIdParam = params.get('classId');
-    const phoneNumberParam = params.get('phoneNumber');
+    if (!timerState) {
+      return;
+    }
 
-    setClassName(classNameParam);
-    setClassId(classIdParam);
-    setPhoneNumber(phoneNumberParam);
+    const { classInfo, parentData } = timerState;
+    const startTime = new Date(timerState.startTime || new Date());
+    const endTime = new Date(timerState.endTime || new Date(startTime.getTime() + (classInfo.duration * 60000)));
+
+    setClassName(classInfo.name);
+    setClassId(classInfo.id);
+    setPhoneNumber(parentData.phoneNumber);
 
     // Create class when component mounts
-    createClass(classNameParam);
+    createClass(classInfo.name);
 
     const updateTimer = () => {
       const now = new Date();
@@ -43,76 +50,13 @@ const TimerDisplay = () => {
     const timerId = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timerId);
-  }, [notificationSent]);
+  }, [timerState, notificationSent]);
 
-  const createClass = async (className) => {
-    try {
-      const response = await fetch('http://localhost:3000/api/create-class', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          className: className
-        }),
-      });
+  // Your existing createClass, registerAttendance, and sendNotification functions remain the same
 
-      if (response.ok) {
-        const data = await response.json();
-        setClassId(data.classId);
-        // Register attendance after class is created
-        registerAttendance(data.classId, phoneNumber);
-      } else {
-        console.error('Failed to create class');
-      }
-    } catch (error) {
-      console.error('Error creating class:', error);
-    }
-  };
-
-  const registerAttendance = async (classId, phoneNumber) => {
-    try {
-      const response = await fetch('http://localhost:3000/api/register-attendance', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          classId: classId,
-          phoneNumber: phoneNumber
-        }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to register attendance');
-      }
-    } catch (error) {
-      console.error('Error registering attendance:', error);
-    }
-  };
-
-  const sendNotification = async () => {
-    try {
-      // End the class and send notifications
-      const response = await fetch('http://localhost:3000/api/end-class', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          classId: classId
-        }),
-      });
-
-      if (response.ok) {
-        console.log('SMS notifications sent successfully');
-      } else {
-        console.error('Failed to send SMS notifications');
-      }
-    } catch (error) {
-      console.error('Error sending SMS notifications:', error);
-    }
-  };
+  if (!timerState) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

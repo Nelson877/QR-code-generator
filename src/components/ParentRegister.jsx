@@ -17,12 +17,10 @@ const ParentRegister = () => {
     setError('');
 
     try {
-      // Basic validation
       if (!formData.name.trim() || !formData.phoneNumber.trim()) {
         throw new Error('Please fill in all fields');
       }
 
-      // Phone number validation
       const phoneRegex = /^\d{10}$/;
       const cleanPhoneNumber = formData.phoneNumber.replace(/[-\s]/g, '');
       
@@ -30,22 +28,13 @@ const ParentRegister = () => {
         throw new Error('Please enter a valid 10-digit phone number');
       }
 
-      // Use direct URL instead of environment-based URL
-      const apiUrl = 'http://localhost:3000/api/parent/register';
-
-      console.log('Making registration request to:', apiUrl);
-      console.log('Request payload:', {
-        name: formData.name.trim(),
-        phoneNumber: cleanPhoneNumber,
-      });
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch('http://localhost:3000/api/parent/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        credentials: 'include', // Added this line
+        credentials: 'include',
         body: JSON.stringify({
           name: formData.name.trim(),
           phoneNumber: cleanPhoneNumber,
@@ -53,7 +42,6 @@ const ParentRegister = () => {
       });
 
       const data = await response.json();
-      console.log('Server response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || `Registration failed (Status: ${response.status}). Please try again.`);
@@ -63,7 +51,6 @@ const ParentRegister = () => {
         throw new Error('Invalid response data from server');
       }
 
-      // Store parent data in localStorage
       localStorage.setItem('parentData', JSON.stringify(data.parent));
 
       const classInfo = {
@@ -72,11 +59,18 @@ const ParentRegister = () => {
         duration: 90,
       };
 
-      navigate('/qr-code-generator', {
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + 90 * 60000);
+
+      navigate('/timer', {
         state: {
           classInfo,
-          parentName: formData.name,
-          parentData: data.parent
+          parentData: {
+            ...data.parent,
+            name: formData.name
+          },
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString()
         }
       });
     } catch (error) {
@@ -85,15 +79,6 @@ const ParentRegister = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setError('');
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   return (

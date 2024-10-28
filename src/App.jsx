@@ -5,6 +5,7 @@ import QRCodeGenerator from './components/QRCodeGenerator/QRCodeGenerator';
 import TimerDisplay from './components/TimerDisplay/TimerDisplay';
 import ParentRegister from './components/ParentRegister';
 import ParentLogin from './components/ParentLogin';
+import AuthCheck from './components/AuthCheck/AuthCheck';
 
 const App = () => {
   // Default class info moved to a function to ensure fresh UUID for each class
@@ -33,7 +34,7 @@ const App = () => {
   // Enhanced Protected Route component that also checks for timer state
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated()) {
-      return <Navigate to="/login" />;
+      return <Navigate to="/login" replace />;
     }
 
     // Get parent data for the protected route
@@ -56,7 +57,7 @@ const App = () => {
         };
 
         // Clone the element with additional props
-        return React.cloneElement(child, { 
+        return React.cloneElement(child, {
           initialState: timerState
         });
       }
@@ -67,38 +68,45 @@ const App = () => {
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route 
-          path="/" 
-          element={<QRCodeGenerator classInfo={getDefaultClassInfo()} />} 
-        />
-        <Route 
-          path="/login" 
-          element={
-            isAuthenticated() ? 
-              <Navigate to="/timer" /> : 
-              <ParentLogin />
-          } 
-        />
-        <Route 
-          path="/register" 
-          element={
-            isAuthenticated() ? 
-              <Navigate to="/timer" /> : 
-              <ParentRegister />
-          } 
-        />
-        <Route
-          path="/timer"
-          element={
-            <ProtectedRoute>
-              <TimerDisplay />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+   // In your App.js or router file
+<Router>
+  <Routes>
+    <Route path="/auth-check" element={<AuthCheck />} />
+    
+    <Route 
+      path="/register" 
+      element={<ParentRegister />}
+    />
+
+    <Route 
+      path="/login" 
+      element={<ParentLogin />}
+    />
+
+    <Route 
+      path="/timer"
+      element={
+        <ProtectedRoute>
+          <TimerDisplay />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route 
+      path="/qr"
+      element={
+        <ProtectedRoute>
+          <QRCodeGenerator />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="*"
+      element={<Navigate to="/qr" replace />}
+    />
+  </Routes>
+</Router>
   );
 };
 

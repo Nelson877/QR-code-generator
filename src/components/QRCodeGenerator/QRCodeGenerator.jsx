@@ -1,22 +1,36 @@
 import React from 'react';
 import { QRCode } from 'react-qrcode-logo';
 import { useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 const QRCodeGenerator = ({ classInfo: propsClassInfo }) => {
   const location = useLocation();
-  // Use either the props classInfo or the one from route state
-  const classInfo = propsClassInfo || location.state?.classInfo;
+  
+  // If no classInfo is provided, create a default one
+  const defaultClassInfo = {
+    id: uuidv4(),
+    name: 'Coding Class',
+    duration: 90,
+  };
+
+  // Use props classInfo, or location state classInfo, or default
+  const classInfo = propsClassInfo || location.state?.classInfo || defaultClassInfo;
   const parentName = location.state?.parentName;
 
   // Base URL for the application
   const baseUrl = 'https://qr-code-generator-navy-beta.vercel.app/';
-
   
-  // Generate URL for the login page with class information as query parameters
-  const qrValue = `${baseUrl}/login?${new URLSearchParams({
+  // Generate URL for the registration/login flow with class information as query parameters
+  const qrValue = `${baseUrl}/auth-check?${new URLSearchParams({
     classId: classInfo.id,
     className: classInfo.name,
-    redirectTo: encodeURIComponent(`/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}`)
+    duration: classInfo.duration,
+    // The final destination after auth flow is complete
+    redirectTo: encodeURIComponent(`/timer?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}`),
+    // Where to go if registration is needed
+    registerRedirect: encodeURIComponent(`/register?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}`),
+    // Where to go if already registered
+    loginRedirect: encodeURIComponent(`/login?classId=${classInfo.id}&className=${encodeURIComponent(classInfo.name)}`)
   }).toString()}`;
 
   return (
@@ -26,13 +40,22 @@ const QRCodeGenerator = ({ classInfo: propsClassInfo }) => {
           Welcome{parentName ? `, ${parentName}` : ''}!
         </h2>
         <h3 className="text-xl font-semibold text-gray-800 mb-6">
-          Scan this QR Code to Login
+          Scan QR Code to Start
         </h3>
         <div className="p-4 bg-white border rounded-lg shadow-md">
-          <QRCode value={qrValue} size={256} />
+          <QRCode 
+            value={qrValue} 
+            size={256}
+            qrStyle="dots"
+            eyeRadius={8}
+            removeQrCodeBehindLogo={true}
+          />
         </div>
         <p className="mt-4 text-sm text-gray-600">
-          Scan to access the parent login page
+          First time? You'll be asked to register.
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          Returning parent? You'll be taken to login.
         </p>
       </div>
     </div>

@@ -36,7 +36,7 @@ const QRCodeGenerator = ({ classInfo: propsClassInfo }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+        <h2 className="text-5xl font-semibold text-gray-800 mb-2">
           Welcome{parentName ? `, ${parentName}` : ''}!
         </h2>
         <h3 className="text-xl font-semibold text-gray-800 mb-6">
@@ -45,7 +45,7 @@ const QRCodeGenerator = ({ classInfo: propsClassInfo }) => {
         <div className="p-4 bg-white border rounded-lg shadow-md">
           <QRCode 
             value={qrValue} 
-            size={256}
+            size={356}
             qrStyle="dots"
             eyeRadius={8}
             removeQrCodeBehindLogo={true}
